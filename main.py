@@ -1,76 +1,113 @@
-import mysql.connector
+from database import *
 
-class AppState:
-    running = True
-    is_authenticated = False
-    db_connection = None
-
-app_state = AppState()
-db_config = {
-    'host': '127.0.0.1',
-    'user': 'root',
-    'password': '12345678',
-    'database': 'pemdas_tugas_akhir'
-}
-
-def connect_database():
-    try:
-        connection = mysql.connector.connect(**db_config)
-    except mysql.connector.Error as e:
-        print('[ERROR] failed connecting to db:', e)
-        return None
-
-    return connection
-
-def close_database(app_state):
-    if app_state.db_connection and app_state.db_connection.is_connected():
-        app_state.db_connection.close()
+running = True
+is_authenticated = False
+connection = None
+current_user = None
 
 def login():
-    pass
+    global is_authenticated
+    global current_user
+
+    assert connection is not None
+
+    username = input('username: ')
+    password = input('password: ')
+
+    cursor = connection.cursor()
+
+    cursor.execute('SELECT * FROM users WHERE username = %s', (username,))
+    rows = cursor.fetchone()
+
+    if not rows:
+        print('[INFO] credentials is invalid')
+        return
+
+    if rows[2] != password:
+        print('[INFO] credentials is invalid')
+        return
+
+    is_authenticated = True
+
+    current_user = {
+            'id': rows[0],
+            'username': rows[1],
+            'password': rows[2]
+    }
+
+    print('[INFO] succesfully authenticated')
 
 def register():
     pass
 
-def exit_func(app_state):
-    app_state.running = False
+def exit_func():
+    global running
+    running = False
 
-def unauthenticated_menu():
-    print('MENU')
+def auth_menu():
+    print('AUTH MENU')
 
     print('1. Login')
     print('2. Register')
     print('3. Exit')
 
-    option = {
+    opt = {
             '1': login,
             '2': register,
             '3': exit_func
     }
 
-    return option
+    return opt
 
-def prompt(option, app_state):
-    o = input('>> ')
+def logout():
+    global is_authenticated
+    global current_user
 
-    func = option.get(o)
-    if func:
-        func(app_state)
+    is_authenticated = False
+    current_user = None
+
+def menu():
+    print('MAIN MENU')
+
+    print('1. Logout')
+
+    opt = {
+            '1': logout
+    }
+
+    return opt
+
+def prompt(option):
+    if current_user is not None:
+        x = input(f'{current_user["username"]}>> ')
     else:
-        print('[WARNING] option is invalid')
+        x = input('>> ')
+    
+    func = option.get(x)
+    if func:
+        func()
+    else:
+        print('[INFO] invalid input')
 
-if __name__ == '__main__':
+def main():
+    global running
+    global connection
+
     connection = connect_database()
     if not connection:
-        app_state.running = False
-
-    app_state.db_connection = connection # pyright: ignore
+        running = False
 
     option = {}
-    while app_state.running:
-        if not app_state.is_authenticated:
-            option = unauthenticated_menu()
 
-        prompt(option, app_state)
+    while running:
+        if not is_authenticated:
+            option = auth_menu()
+        else:
+            option = menu()
 
-    close_database(app_state)
+        prompt(option)
+
+    close_database(connection)
+
+if __name__ == '__main__':
+    main()
