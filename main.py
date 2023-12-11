@@ -32,7 +32,8 @@ def login():
     current_user = {
             'id': rows[0],
             'username': rows[1],
-            'password': rows[2]
+            'password': rows[2],
+            'is_admin': rows[3] == 'admin' 
     }
 
     print('[INFO] succesfully authenticated')
@@ -58,6 +59,10 @@ def auth_menu():
     }
 
     return opt
+
+def admin_menu():
+    print('admin menu')
+    return {}
 
 def logout():
     global is_authenticated
@@ -103,7 +108,11 @@ def main():
         if not is_authenticated:
             option = auth_menu()
         else:
-            option = menu()
+            assert current_user is not None
+            if current_user['is_admin']:
+                option = admin_menu()
+            else:
+                option = menu()
 
         prompt(option)
 
