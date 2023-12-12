@@ -23,10 +23,27 @@ class MakeReservationHandler(BaseHandler):
         app_state.db.commit()
 
 class VerifyReservationHandler(BaseHandler):
-    def handle(self, _: AppState):
+    def handle(self, app_state: AppState):
         print('VERIFY RESERVATION')
 
-        return super().handle(_)
+        inp, errors = validate_input([
+            Input('reservation_id', 'int'),
+        ])
+
+        if len(errors) > 0:
+            print('Invalid input')
+            return 
+
+        cursor = app_state.db.cursor()
+
+        cursor.execute('SELECT * FROM reservations WHERE id = %s', (inp['reservation_id'],))
+        rows = cursor.fetchone()
+
+        if rows is None:
+            print('reservation invalid')
+            return
+
+        print('reservation is valid')
 
 class MenuHandler(BaseHandler):
     option = {
