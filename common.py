@@ -3,6 +3,7 @@ from typing import NamedTuple
 from mysql.connector.pooling import PooledMySQLConnection
 
 class User(NamedTuple):
+    id: str
     name: str
     username: str
     password: str

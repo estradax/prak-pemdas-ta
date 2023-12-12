@@ -27,7 +27,7 @@ class LoginHandler(BaseHandler):
             print('Invalid credentials')
             return           
 
-        app_state.user = User(str(rows[1]), str(rows[2]), str(rows[3]))
+        app_state.user = User(str(rows[0]), str(rows[1]), str(rows[2]), str(rows[3]))
 
 class RegisterHandler(BaseHandler):
     def handle(self, app_state: AppState):
