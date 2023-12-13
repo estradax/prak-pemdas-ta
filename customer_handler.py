@@ -2,6 +2,23 @@ from common import BaseHandler, AppState, Option, ExitHandler
 from helper import *
 import pandas as pd
 
+def verify_impl(cursor, id):
+    cursor.execute('SELECT * FROM reservations JOIN users ON reservations.user_id = users.id JOIN rooms ON reservations.room_id = rooms.id WHERE reservations.id = %s', (id,))
+    rows = cursor.fetchone()
+
+    return rows
+
+def print_invoice(rows):
+    print()
+    print('Invoice')
+    print(f'Transaction ID: {rows[0]}')
+    print(f'Room          : {rows[9]} ({rows[8]})')
+    print(f'Price         : {rows[11]}')
+    print(f'User          : {rows[5]} ({rows[6]})')
+    print(f'Day Count     : {rows[3]}')
+    print(f'Grand Total   : {rows[11]}x{rows[3]} = {float(rows[11]) * float(rows[3])}') # pyright: ignore
+
+
 class MakeReservationHandler(BaseHandler):
     def handle(self, app_state: AppState):
         print_headline('MENU | MAKE RESERVATION')
@@ -48,23 +65,15 @@ class MakeReservationHandler(BaseHandler):
 
         app_state.db.commit()
 
-        cursor.execute('SELECT * FROM reservations JOIN users ON reservations.user_id = users.id JOIN rooms ON reservations.room_id = rooms.id WHERE reservations.id = %s', (cursor.lastrowid,))
-        rows = cursor.fetchone()
+        rows = verify_impl(cursor, cursor.lastrowid) 
 
         assert rows is not None
 
-        print()
-        print('Invoice')
-        print(f'Transaction ID: {rows[0]}')
-        print(f'Room          : {rows[9]} ({rows[8]})')
-        print(f'Price         : {rows[11]}')
-        print(f'User          : {rows[5]} ({rows[6]})')
-        print(f'Day Count     : {rows[3]}')
-        print(f'Grand Total   : {rows[11]}x{rows[3]} = {float(rows[11]) * float(rows[3])}')
+        print_invoice(rows)
 
 class VerifyReservationHandler(BaseHandler):
     def handle(self, app_state: AppState):
-        print('VERIFY RESERVATION')
+        print_headline('MENU | VERIFY RESERVATION')
 
         inp, errors = validate_input([
             Input('reservation_id', 'int'),
@@ -76,14 +85,13 @@ class VerifyReservationHandler(BaseHandler):
 
         cursor = app_state.db.cursor()
 
-        cursor.execute('SELECT * FROM reservations WHERE id = %s', (inp['reservation_id'],))
-        rows = cursor.fetchone()
+        rows = verify_impl(cursor, inp['reservation_id'])
 
         if rows is None:
-            print('reservation invalid')
+            log_info('reservation invalid')
             return
 
-        print('reservation is valid')
+        print_invoice(rows)
 
 class MenuHandler(BaseHandler):
     option = {
