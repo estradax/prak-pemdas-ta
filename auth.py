@@ -3,7 +3,7 @@ from common import *
 
 class LoginHandler(BaseHandler):
     def handle(self, app_state: AppState):
-        print('LOGIN')
+        print_headline('AUTH MENU | LOGIN')
 
         inp, errors = validate_input([
             Input('username', 'any'),
@@ -31,7 +31,7 @@ class LoginHandler(BaseHandler):
 
 class RegisterHandler(BaseHandler):
     def handle(self, app_state: AppState):
-        print('REGISTER')
+        print_headline('AUTH MENU | REGISTER')
 
         inp, errors = validate_input([
             Input('name', 'any'),
@@ -62,7 +62,7 @@ class AuthMenuHandler:
     }
 
     def handle(self, _: AppState):
-        print('AUTH MENU')
+        print_headline('AUTH MENU')
 
         print_option(self.option)
 
