@@ -35,14 +35,10 @@ class MakeReservationHandler(BaseHandler):
                 'price': list(map(lambda x: x[3], rows))
         }
 
-        df = pd.DataFrame(data)
-        if len(df) < 1:
-            log_info('no rooms avaiable', False)
-            return
+        print_table_dataframe(data, 'Available rooms:')
 
-        print('Avaiable rooms:')
-        print(df)
-        print()
+        if len(rows) < 1:
+            return
 
         inp, errors = validate_input([
             Input('room_id', 'int'),

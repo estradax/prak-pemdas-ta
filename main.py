@@ -2,6 +2,7 @@ import mysql.connector
 from common import *
 from auth import *
 from customer_handler import *
+from admin import AdminMenuHandler
 
 class Application:
     def __init__(self, app_state: AppState):
@@ -9,6 +10,7 @@ class Application:
 
         self.auth_menu_handler = AuthMenuHandler()
         self.menu_handler = MenuHandler()
+        self.admin_menu_handler = AdminMenuHandler()
 
     def run(self):
         option = {}
@@ -16,7 +18,10 @@ class Application:
             if not self.app_state.user:
                 option = self.auth_menu_handler.handle(self.app_state)
             else:
-                option = self.menu_handler.handle(self.app_state)
+                if self.app_state.user.username == 'admin':
+                    option = self.admin_menu_handler.handle(self.app_state)
+                else:
+                    option = self.menu_handler.handle(self.app_state)
 
             if self.app_state.user:
                 x = input(f'{self.app_state.user.name}>> ')

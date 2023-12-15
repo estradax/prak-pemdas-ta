@@ -1,5 +1,6 @@
 from typing import List
 from common import * 
+import pandas as pd
 
 def print_option(option):
     for k in option.keys():
@@ -36,3 +37,13 @@ def print_headline(s):
 +{'=' * (box_width - 2)}+
     """
     print(headline)
+
+def print_table_dataframe(data, title):
+    df = pd.DataFrame(data)
+    if len(df) < 1:
+        log_info('no data avaiable', False)
+        return
+
+    print(title)
+    print(df)
+    print()
