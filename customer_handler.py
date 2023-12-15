@@ -1,6 +1,5 @@
 from common import BaseHandler, AppState, Option, ExitHandler
 from helper import *
-import pandas as pd
 
 def verify_impl(cursor, id):
     cursor.execute('SELECT * FROM reservations JOIN users ON reservations.user_id = users.id JOIN rooms ON reservations.room_id = rooms.id WHERE reservations.id = %s', (id,))
